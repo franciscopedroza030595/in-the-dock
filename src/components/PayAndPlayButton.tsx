@@ -100,15 +100,22 @@ export default function PayAndPlayButton({ onRunStarted }: Props) {
           ...txOverrides,
         });
       } else {
-        // Paid play — approve USDC first
+        // Paid play — approve USDC first, then WAIT for it to be mined.
+        // writeContractAsync only resolves once the tx is broadcast, not
+        // confirmed — calling play() immediately after races the allowance
+        // update and fails with SafeERC20FailedOperation on MiniPay/mobile
+        // wallets where block propagation is slower.
         setStep("approving");
-        await writeContractAsync({
+        const approveHash = await writeContractAsync({
           address: USDC_ADDRESS,
           abi: ERC20_APPROVE_ABI,
           functionName: "approve",
           args: [POT_ADDRESS, ENTRY_FEE_UNITS],
           ...txOverrides,
         });
+        if (publicClient) {
+          await publicClient.waitForTransactionReceipt({ hash: approveHash, confirmations: 1 });
+        }
 
         setStep("playing");
         txHash = await writeContractAsync({

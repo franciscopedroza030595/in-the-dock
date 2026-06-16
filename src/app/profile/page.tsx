@@ -7,6 +7,7 @@ import { Flame, Trophy, Target, Zap, Wallet, Star, Eye, EyeOff, LogOut } from "l
 import clsx from "clsx";
 import { useCurrentPlayer } from "@/lib/wallet";
 import { savePlayer } from "@/lib/player";
+import { useIsMiniPay } from "@/lib/minipay";
 
 const BADGES = [
   { id:"first",    emoji:"🎯", label:"First solve",    check: (s:any) => s.allTimeSolved >= 1 },
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const { address } = useCurrentPlayer();
   const { disconnect } = useDisconnect();
   const router = useRouter();
+  const inMiniPay = useIsMiniPay();
 
   async function toggleShowUsername() {
     const newVal = !s.showUsername;
@@ -113,13 +115,15 @@ export default function ProfilePage() {
               <span>{s.walletAddress.slice(0,6)}...{s.walletAddress.slice(-4)}</span>
               <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-2 py-0.5">Celo Sepolia</span>
             </div>
-            <button
-              onClick={handleDisconnect}
-              className="flex items-center justify-center gap-2 w-full py-2.5 text-xs font-semibold text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl hover:bg-red-500/10 transition-colors"
-            >
-              <LogOut size={13} />
-              Disconnect &amp; switch wallet
-            </button>
+            {!inMiniPay && (
+              <button
+                onClick={handleDisconnect}
+                className="flex items-center justify-center gap-2 w-full py-2.5 text-xs font-semibold text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut size={13} />
+                Disconnect &amp; switch wallet
+              </button>
+            )}
           </>
         ) : (
           <p className="text-xs text-muted text-center py-2">Connect your wallet to receive prizes</p>
