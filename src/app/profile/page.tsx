@@ -64,13 +64,13 @@ export default function ProfilePage() {
           <button
             onClick={toggleShowUsername}
             className={clsx(
-              "relative w-11 h-6 rounded-full transition-colors",
+              "relative w-11 h-6 rounded-full transition-colors flex-shrink-0",
               s.showUsername ? "bg-brand" : "bg-surface border border-border"
             )}
           >
             <span className={clsx(
-              "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
-              s.showUsername ? "translate-x-5" : "translate-x-0.5"
+              "absolute top-0.5 bottom-0.5 w-5 rounded-full bg-white shadow transition-all duration-200",
+              s.showUsername ? "right-0.5" : "left-0.5"
             )} />
           </button>
         </div>
