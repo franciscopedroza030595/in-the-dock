@@ -43,17 +43,26 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/leaderboard")
-      .then(r => r.json())
-      .then(d => {
-        const entries: LeaderEntry[] = d.entries ?? [];
-        setLeaders(entries.slice(0, 3));
-        if (address) {
-          const me = entries.find(e => e.player.toLowerCase() === address.toLowerCase());
-          setMyRank(me?.rank ?? entries.length + 1);
-        }
-      })
-      .catch(() => {});
+    let active = true;
+    function load() {
+      fetch("/api/leaderboard", { cache: "no-store" })
+        .then(r => r.json())
+        .then(d => {
+          if (!active) return;
+          const entries: LeaderEntry[] = d.entries ?? [];
+          setLeaders(entries.slice(0, 3));
+          if (address) {
+            const me = entries.find(e => e.player.toLowerCase() === address.toLowerCase());
+            setMyRank(me?.rank ?? entries.length + 1);
+          }
+        })
+        .catch(() => {});
+    }
+    load();
+    function onFocus() { load(); }
+    window.addEventListener("focus", onFocus);
+    const id = setInterval(load, 5000);
+    return () => { active = false; window.removeEventListener("focus", onFocus); clearInterval(id); };
   }, [address]);
 
   const accuracy = todayAttempted > 0 ? Math.round((todayCorrect / todayAttempted) * 100) : 0;

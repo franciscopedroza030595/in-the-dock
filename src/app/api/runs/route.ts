@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     const c = qRow as ChallengeRow;
     return Response.json({
       runId: d.id,
-      question: { id: c.id, category: c.category, difficulty: c.difficulty, prompt: c.prompt, options: c.options, explanation: c.explanation },
+      question: { id: c.id, category: c.category, difficulty: c.difficulty, prompt: c.prompt, options: c.options },
       qIndex: 0,
       totalQuestions: QUESTIONS_PER_RUN,
     });
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 
   return Response.json({
     runId,
-    question: { id: pick.id, category: pick.category, difficulty: pick.difficulty, prompt: pick.prompt, options: pick.options, explanation: pick.explanation },
+    question: { id: pick.id, category: pick.category, difficulty: pick.difficulty, prompt: pick.prompt, options: pick.options },
     qIndex: 0,
     totalQuestions: QUESTIONS_PER_RUN,
   });

@@ -20,7 +20,6 @@ interface ServerQuestion {
   difficulty: Difficulty;
   prompt: string;
   options: string[];
-  explanation: string;
 }
 
 type Phase = "lobby" | "question" | "feedback" | "done";
@@ -306,14 +305,6 @@ export default function PlayPage() {
               <span className={clsx("text-3xl font-black", isCorrect ? "text-correct" : "text-wrong")}>
                 {isCorrect ? `+${pts}` : "+0"}
               </span>
-            </div>
-
-            <div className="card p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">💡</span>
-                <p className="font-bold text-sm">Explanation</p>
-              </div>
-              <p className="text-white/80 text-sm leading-relaxed">{question.explanation}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">

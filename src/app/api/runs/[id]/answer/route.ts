@@ -139,7 +139,6 @@ export async function POST(
       difficulty: next.difficulty,
       prompt: next.prompt,
       options: next.options,
-      explanation: next.explanation,
     },
     qIndex: rc.q_index + 1,
     totalQuestions: QUESTIONS_PER_RUN,

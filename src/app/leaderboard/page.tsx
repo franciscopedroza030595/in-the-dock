@@ -39,10 +39,19 @@ export default function LeaderboardPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/leaderboard")
-      .then(r => r.json())
-      .then(d => { setEntries(d.entries ?? []); setLoading(false); })
-      .catch(() => setLoading(false));
+    let active = true;
+    function load() {
+      fetch("/api/leaderboard", { cache: "no-store" })
+        .then(r => r.json())
+        .then(d => { if (active) { setEntries(d.entries ?? []); setLoading(false); } })
+        .catch(() => { if (active) setLoading(false); });
+    }
+    load();
+    // Refresh on tab focus and on a short interval so a just-finished run shows up immediately
+    function onFocus() { load(); }
+    window.addEventListener("focus", onFocus);
+    const id = setInterval(load, 5000);
+    return () => { active = false; window.removeEventListener("focus", onFocus); clearInterval(id); };
   }, []);
 
   const myEntry = entries.find(e => address && e.player.toLowerCase() === address.toLowerCase());
