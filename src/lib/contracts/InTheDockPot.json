@@ -1,0 +1,158 @@
+{
+  "abi": [
+    {
+      "type": "constructor",
+      "inputs": [
+        { "name": "_owner", "type": "address" },
+        { "name": "_operator", "type": "address" },
+        { "name": "_protocolFeeRecipient", "type": "address" },
+        { "name": "_token", "type": "address" },
+        { "name": "_entryFee", "type": "uint256" },
+        { "name": "_dailySeed", "type": "uint256" }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "play",
+      "inputs": [],
+      "outputs": [{ "name": "wasFree", "type": "bool" }],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "claim",
+      "inputs": [{ "name": "day", "type": "uint256" }],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "rollDay",
+      "inputs": [{ "name": "winnerOfClosedDay", "type": "address" }],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "fundTreasury",
+      "inputs": [{ "name": "amount", "type": "uint256" }],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "sponsorPot",
+      "inputs": [{ "name": "amount", "type": "uint256" }],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "seedCurrentDay",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "hasFreePlayToday",
+      "inputs": [{ "name": "user", "type": "address" }],
+      "outputs": [{ "name": "", "type": "bool" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "viewPot",
+      "inputs": [{ "name": "day", "type": "uint256" }],
+      "outputs": [{ "name": "", "type": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "currentDay",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "pot",
+      "inputs": [{ "name": "day", "type": "uint256" }],
+      "outputs": [{ "name": "", "type": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "winnerOf",
+      "inputs": [{ "name": "day", "type": "uint256" }],
+      "outputs": [{ "name": "", "type": "address" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "claimed",
+      "inputs": [{ "name": "day", "type": "uint256" }],
+      "outputs": [{ "name": "", "type": "bool" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "token",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "address" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "entryFee",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "treasury",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "lastFreePlayDay",
+      "inputs": [{ "name": "user", "type": "address" }],
+      "outputs": [{ "name": "", "type": "uint256" }],
+      "stateMutability": "view"
+    },
+    {
+      "type": "event",
+      "name": "Played",
+      "inputs": [
+        { "name": "day",      "type": "uint256", "indexed": true },
+        { "name": "player",   "type": "address", "indexed": true },
+        { "name": "wasFree",  "type": "bool",    "indexed": false },
+        { "name": "potAfter", "type": "uint256", "indexed": false }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "DayRolled",
+      "inputs": [
+        { "name": "closedDay",    "type": "uint256", "indexed": true },
+        { "name": "closedWinner", "type": "address", "indexed": false },
+        { "name": "closedPot",    "type": "uint256", "indexed": false },
+        { "name": "newDay",       "type": "uint256", "indexed": true },
+        { "name": "seeded",       "type": "uint256", "indexed": false }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "Claimed",
+      "inputs": [
+        { "name": "day",    "type": "uint256", "indexed": true },
+        { "name": "winner", "type": "address", "indexed": true },
+        { "name": "amount", "type": "uint256", "indexed": false }
+      ]
+    }
+  ]
+}

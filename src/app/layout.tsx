@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Providers } from "@/lib/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "In The Dock",
-  description: "Daily reasoning challenge · Win 1 USDC",
+  description: "Daily reasoning challenge · Win USDT on Celo",
   other: { "mobile-web-app-capable": "yes", "apple-mobile-web-app-capable": "yes" },
 };
 
@@ -18,7 +19,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-svh bg-bg">{children}</body>
+      <body className="min-h-svh bg-bg">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
