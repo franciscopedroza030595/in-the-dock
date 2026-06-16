@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useWriteContract, useReadContract } from "wagmi";
+import { useWriteContract, useReadContract, usePublicClient } from "wagmi";
 import { parseAbi, isAddressEqual, zeroAddress } from "viem";
 import { POT_ADDRESS, USDC_ADDRESS, ENTRY_FEE_UNITS } from "@/lib/chain";
 import { ITD_ABI } from "@/lib/onchain";
@@ -26,6 +26,7 @@ const contractsConfigured =
 export default function PayAndPlayButton({ onRunStarted }: Props) {
   const { address, isConnected } = useCurrentPlayer();
   const txOverrides = useTxOverrides();
+  const publicClient = usePublicClient();
   const [step, setStep] = useState<Step>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -83,8 +84,12 @@ export default function PayAndPlayButton({ onRunStarted }: Props) {
         });
       }
 
-      // Create run on server
+      // Wait for 1 confirmation so the server's RPC can find the receipt
       setStep("creating");
+      if (publicClient) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash, confirmations: 1 });
+      }
+      // Create run on server
       const res = await fetch("/api/runs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

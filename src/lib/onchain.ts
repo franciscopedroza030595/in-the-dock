@@ -20,16 +20,25 @@ export type VerifyResult =
   | { valid: true; wasFree: boolean; potAfter: bigint; dayNumber: bigint }
   | { valid: false; reason: string };
 
+async function waitForReceipt(hash: Hex, retries = 12, delayMs = 3000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const r = await celoClient.getTransactionReceipt({ hash });
+      if (r) return r;
+    } catch {
+      // not mined yet
+    }
+    if (i < retries - 1) await new Promise((res) => setTimeout(res, delayMs));
+  }
+  return null;
+}
+
 export async function verifyPaymentTx(
   txHash: string,
   player: string,
 ): Promise<VerifyResult> {
-  let receipt;
-  try {
-    receipt = await celoClient.getTransactionReceipt({ hash: txHash as Hex });
-  } catch {
-    return { valid: false, reason: "tx-not-found" };
-  }
+  const receipt = await waitForReceipt(txHash as Hex);
+  if (!receipt) return { valid: false, reason: "tx-not-found" };
 
   if (receipt.status !== "success") return { valid: false, reason: "tx-failed" };
   if (!receipt.to || receipt.to.toLowerCase() !== POT_ADDRESS.toLowerCase())
