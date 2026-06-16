@@ -28,7 +28,7 @@ type Phase = "lobby" | "question" | "feedback" | "done";
 export default function PlayPage() {
   const router = useRouter();
   const { isConnected } = useCurrentPlayer();
-  const { username } = useGameStore();
+  const { username, addScore } = useGameStore();
 
   const [runId, setRunId]         = useState<string | null>(null);
   const [question, setQuestion]   = useState<ServerQuestion | null>(null);
@@ -96,11 +96,15 @@ export default function PlayPage() {
       const data = await res.json();
 
       const correct = data.correct ?? false;
+      const earnedPts = data.points ?? 0;
+      const newStreak = correct ? streak + 1 : 0;
       setIsCorrect(correct);
-      setPts(data.points ?? 0);
+      setPts(earnedPts);
       setScore(data.score ?? score);
       setCorrectCount((c) => c + (correct ? 1 : 0));
-      setStreak((s) => (correct ? s + 1 : 0));
+      setStreak(newStreak);
+      // Persist to store so profile & home show real data
+      addScore(earnedPts, correct, newStreak);
       setPhase("feedback");
 
       if (data.ended) {
@@ -150,10 +154,10 @@ export default function PlayPage() {
   // ── Lobby ────────────────────────────────────────────────────────────────
   if (phase === "lobby") {
     return (
-      <div className="min-h-svh flex flex-col px-4 pt-10 pb-28 gap-6">
+      <div className="min-h-svh flex flex-col px-4 pt-10 pb-28 gap-6 overflow-y-auto">
         <div className="text-center">
           <p className="text-3xl font-black text-white mb-1">In The Dock</p>
-          <p className="text-muted text-sm">Hey {username} · 10 questions · Best score wins the daily pot</p>
+          <p className="text-muted text-sm">Hey {username} · 10 questions · Best score wins</p>
         </div>
 
         <div className="card p-5 flex flex-col gap-4">
@@ -168,9 +172,9 @@ export default function PlayPage() {
         <div className="card p-4 flex flex-col gap-2 text-sm">
           <p className="font-bold text-white">How it works</p>
           <p className="text-muted text-xs">1. First play of the day is <span className="text-emerald-400 font-semibold">free</span></p>
-          <p className="text-muted text-xs">2. Extra plays cost <span className="text-gold font-semibold">0.10 USDC</span> — 80% goes to the pot</p>
-          <p className="text-muted text-xs">3. Highest score at midnight wins the entire pot</p>
-          <p className="text-muted text-xs">4. Prize paid on-chain to your wallet</p>
+          <p className="text-muted text-xs">2. Pay <span className="text-gold font-semibold">0.10 USDC</span> to play again and try to beat your score</p>
+          <p className="text-muted text-xs">3. Highest score at midnight <span className="text-white font-semibold">wins 1 USDC</span></p>
+          <p className="text-muted text-xs">4. Prize paid on-chain to the winner's wallet</p>
         </div>
 
         <BottomNav />
@@ -206,7 +210,7 @@ export default function PlayPage() {
 
   // ── Question / Feedback ──────────────────────────────────────────────────
   return (
-    <div className="min-h-svh flex flex-col px-4 pt-4 pb-8">
+    <div className="min-h-svh flex flex-col px-4 pt-4 pb-8 overflow-y-auto">
 
       {/* Top bar */}
       <div className="flex items-center justify-between mb-4">
@@ -264,7 +268,7 @@ export default function PlayPage() {
               </div>
             </div>
 
-            <div className="card p-5 flex-1 flex items-center justify-center">
+            <div className="card p-5 min-h-[120px] flex items-center justify-center">
               <p className="font-mono text-xl font-bold text-white whitespace-pre-wrap text-center leading-relaxed">{question.prompt}</p>
             </div>
 

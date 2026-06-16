@@ -42,6 +42,7 @@ interface GameState {
   completeOnboarding: () => void;
   startSession: (challenges: Challenge[]) => void;
   recordAttempt: (challengeId: string, correct: boolean, ms: number) => void;
+  addScore: (pts: number, correct: boolean, streak: number) => void;
   endSession: () => void;
   resetIfNewDay: () => void;
 }
@@ -109,6 +110,21 @@ export const useGameStore = create<GameState>()(
         });
       },
 
+      addScore: (pts, correct, newStreak) => {
+        const s = get();
+        s.resetIfNewDay();
+        const s2 = get();
+        set({
+          todayScore:    s2.todayScore + pts,
+          todayCorrect:  s2.todayCorrect + (correct ? 1 : 0),
+          todayAttempted: s2.todayAttempted + 1,
+          streak:        newStreak,
+          bestStreak:    Math.max(s2.bestStreak, newStreak),
+          allTimeScore:  s2.allTimeScore + pts,
+          allTimeSolved: s2.allTimeSolved + (correct ? 1 : 0),
+        });
+      },
+
       endSession: () => set({ sessionActive: false }),
 
       resetIfNewDay: () => {
@@ -141,14 +157,3 @@ export const useGameStore = create<GameState>()(
   )
 );
 
-// Simulated leaderboard data
-export const MOCK_LEADERBOARD = [
-  { rank: 1, username: "mariag_col",  score: 2840, solved: 142, streak: 6, country: "🇨🇴" },
-  { rank: 2, username: "tokyo_tim",   score: 2310, solved: 118, streak: 4, country: "🇯🇵" },
-  { rank: 3, username: "ibrahim_ng",  score: 1990, solved:  99, streak: 3, country: "🇳🇬" },
-  { rank: 4, username: "priya_m",     score: 1450, solved:  72, streak: 1, country: "🇮🇳" },
-  { rank: 5, username: "carlos_dev",  score: 1200, solved:  60, streak: 0, country: "🇲🇽" },
-  { rank: 6, username: "alex_k",      score:  980, solved:  49, streak: 2, country: "🇰🇪" },
-  { rank: 7, username: "fatou_s",     score:  760, solved:  38, streak: 0, country: "🇸🇳" },
-  { rank: 8, username: "jung_h",      score:  620, solved:  31, streak: 1, country: "🇰🇷" },
-];

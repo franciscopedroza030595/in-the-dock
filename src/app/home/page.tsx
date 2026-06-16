@@ -1,13 +1,28 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useGameStore, MOCK_LEADERBOARD } from "@/store/gameStore";
+import { useGameStore } from "@/store/gameStore";
 import BottomNav from "@/components/BottomNav";
 import { Flame, Trophy, Zap, Brain, ChevronRight } from "lucide-react";
+import { useCurrentPlayer } from "@/lib/wallet";
+
+interface LeaderEntry {
+  rank: number;
+  player: string;
+  score: number;
+  correctCount: number;
+}
+
+function shortAddr(addr: string) {
+  return addr.slice(0, 6) + "…" + addr.slice(-4);
+}
 
 export default function HomePage() {
   const { username, todayScore, todayCorrect, todayAttempted, streak, resetIfNewDay } = useGameStore();
+  const { address } = useCurrentPlayer();
   const [timeLeft, setTimeLeft] = useState("");
+  const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
+  const [myRank, setMyRank] = useState<number | null>(null);
 
   useEffect(() => {
     resetIfNewDay();
@@ -26,12 +41,29 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
-  // Find user rank in mock leaderboard based on score
-  const myRank = MOCK_LEADERBOARD.filter(e => e.score > todayScore).length + 1;
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then(r => r.json())
+      .then(d => {
+        const entries: LeaderEntry[] = d.entries ?? [];
+        setLeaders(entries.slice(0, 3));
+        if (address) {
+          const me = entries.find(e => e.player.toLowerCase() === address.toLowerCase());
+          setMyRank(me?.rank ?? entries.length + 1);
+        }
+      })
+      .catch(() => {});
+  }, [address]);
+
   const accuracy = todayAttempted > 0 ? Math.round((todayCorrect / todayAttempted) * 100) : 0;
 
+  function displayName(entry: LeaderEntry) {
+    if (address && entry.player.toLowerCase() === address.toLowerCase()) return username;
+    return shortAddr(entry.player);
+  }
+
   return (
-    <div className="min-h-svh pb-24 px-4 pt-6">
+    <div className="min-h-svh pb-24 px-4 pt-6 overflow-y-auto">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
@@ -54,22 +86,12 @@ export default function HomePage() {
           <p className="label mb-1">Your rank today</p>
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-5xl font-black text-white">#{myRank}</p>
+              <p className="text-5xl font-black text-white">{myRank !== null ? `#${myRank}` : "—"}</p>
               <p className="text-muted text-xs mt-1">{todayScore} points earned</p>
             </div>
             <div className="text-right">
               <p className="label mb-1">Prize resets in</p>
               <p className="text-gold font-black text-sm">{timeLeft}</p>
-            </div>
-          </div>
-          {/* Progress bar toward leader */}
-          <div className="mt-4">
-            <div className="flex justify-between text-[10px] text-muted mb-1">
-              <span>You: {todayScore}</span>
-              <span>Leader: {MOCK_LEADERBOARD[0].score}</span>
-            </div>
-            <div className="h-2 rounded-full bg-surface overflow-hidden">
-              <div className="h-full bg-brand rounded-full transition-all" style={{width:`${Math.min(100,(todayScore/MOCK_LEADERBOARD[0].score)*100)}%`}} />
             </div>
           </div>
         </div>
@@ -103,27 +125,25 @@ export default function HomePage() {
           <p className="font-bold text-sm flex items-center gap-2"><Trophy size={14} className="text-gold" /> Today's top 3</p>
           <Link href="/leaderboard" className="text-xs text-brand-light font-semibold">See all →</Link>
         </div>
-        <div className="flex flex-col gap-2">
-          {MOCK_LEADERBOARD.slice(0,3).map((e, i) => (
-            <div key={e.username} className="flex items-center gap-3">
-              <span className="text-lg w-6 text-center">{["🥇","🥈","🥉"][i]}</span>
-              <span className="text-sm font-semibold flex-1">{e.country} {e.username}</span>
-              <span className="text-sm font-black text-white">{e.score.toLocaleString()}</span>
-            </div>
-          ))}
-        </div>
+        {leaders.length === 0 ? (
+          <p className="text-xs text-muted text-center py-2">No scores yet — be the first!</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {leaders.map((e, i) => (
+              <div key={e.player} className="flex items-center gap-3">
+                <span className="text-lg w-6 text-center">{["🥇","🥈","🥉"][i]}</span>
+                <span className="text-sm font-semibold flex-1 truncate">{displayName(e)}</span>
+                <span className="text-sm font-black text-white">{e.score.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Daily limit */}
+      {/* Daily prize info */}
       <div className="card p-4">
-        <div className="flex justify-between mb-2">
-          <p className="text-sm font-semibold">Daily challenges</p>
-          <p className="text-sm font-bold">{todayAttempted} / 120</p>
-        </div>
-        <div className="h-2 rounded-full bg-surface overflow-hidden">
-          <div className="h-full bg-brand rounded-full" style={{width:`${(todayAttempted/120)*100}%`}} />
-        </div>
-        <p className="text-xs text-muted mt-2">{Math.max(0,120-todayAttempted)} challenges remaining today</p>
+        <p className="text-sm font-semibold mb-1">🏆 Daily prize: 1 USDC</p>
+        <p className="text-xs text-muted">Highest score at midnight wins. Prize paid on-chain to winner's wallet.</p>
       </div>
 
       <BottomNav />

@@ -54,8 +54,8 @@ export default function OnboardingScreen() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col gap-3 w-full max-w-xs">
           <div className="card p-4 flex flex-col gap-3 text-sm">
             <p className="text-muted text-xs">✅ First play every day is <span className="text-emerald-400 font-semibold">free</span></p>
-            <p className="text-muted text-xs">💰 Extra plays cost <span className="text-gold font-semibold">0.10 USDC</span></p>
-            <p className="text-muted text-xs">🏆 Best score wins the entire daily pot</p>
+            <p className="text-muted text-xs">💰 Pay <span className="text-gold font-semibold">0.10 USDC</span> to play again and beat your score</p>
+            <p className="text-muted text-xs">🏆 Best score at midnight wins <span className="text-white font-semibold">1 USDC</span></p>
           </div>
 
           {/* RainbowKit ConnectButton styled to match */}

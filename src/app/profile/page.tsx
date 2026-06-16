@@ -1,24 +1,23 @@
 "use client";
 import { useGameStore } from "@/store/gameStore";
 import BottomNav from "@/components/BottomNav";
-import { Flame, Trophy, Target, Zap, Wallet, Star, RotateCcw } from "lucide-react";
-import { CAT_META } from "@/lib/challenges";
+import { Flame, Trophy, Target, Zap, Wallet, Star } from "lucide-react";
+import clsx from "clsx";
 
 const BADGES = [
-  { id:"first",    emoji:"🎯", label:"First solve",    desc:"Answered your first question",   check: (s:any) => s.allTimeSolved >= 1 },
-  { id:"streak3",  emoji:"🔥", label:"3-day streak",   desc:"3 correct answers in a row",      check: (s:any) => s.bestStreak >= 3 },
-  { id:"50pts",    emoji:"⚡", label:"50 points",      desc:"Scored 50+ pts in a day",         check: (s:any) => s.todayScore >= 50 },
-  { id:"century",  emoji:"💯", label:"100 solved",     desc:"Solved 100 challenges all-time",  check: (s:any) => s.allTimeSolved >= 100 },
-  { id:"perfect5", emoji:"🌟", label:"Perfect streak", desc:"5 correct in a row",              check: (s:any) => s.bestStreak >= 5 },
-  { id:"winner",   emoji:"🏆", label:"Champion",       desc:"Won a daily competition",         check: (s:any) => s.totalEarned > 0 },
+  { id:"first",    emoji:"🎯", label:"First solve",    check: (s:any) => s.allTimeSolved >= 1 },
+  { id:"streak3",  emoji:"🔥", label:"3-day streak",   check: (s:any) => s.bestStreak >= 3 },
+  { id:"50pts",    emoji:"⚡", label:"50 points",      check: (s:any) => s.todayScore >= 50 },
+  { id:"century",  emoji:"💯", label:"100 solved",     check: (s:any) => s.allTimeSolved >= 100 },
+  { id:"perfect5", emoji:"🌟", label:"Perfect 5",      check: (s:any) => s.bestStreak >= 5 },
+  { id:"winner",   emoji:"🏆", label:"Champion",       check: (s:any) => s.totalEarned > 0 },
 ];
 
 export default function ProfilePage() {
   const s = useGameStore();
-  const accuracy = s.allTimeSolved > 0 ? Math.round((s.allTimeSolved / Math.max(s.allTimeScore/7.5, s.allTimeSolved)) * 100) : 0;
 
   return (
-    <div className="min-h-svh pb-24 px-4 pt-5">
+    <div className="min-h-svh pb-24 px-4 pt-5 overflow-y-auto">
 
       {/* Avatar + name */}
       <div className="flex items-center gap-4 mb-5">
@@ -27,10 +26,10 @@ export default function ProfilePage() {
         </div>
         <div>
           <p className="text-xl font-black text-white">{s.username}</p>
-          {s.streak >= 2 && (
+          {s.bestStreak >= 2 && (
             <div className="flex items-center gap-1 mt-1">
               <Flame size={13} className="text-orange-400" />
-              <span className="text-xs font-semibold text-orange-400">{s.streak} day streak</span>
+              <span className="text-xs font-semibold text-orange-400">Best streak: {s.bestStreak}</span>
             </div>
           )}
           <p className="text-xs text-muted mt-0.5">{s.daysPlayed} days played</p>
@@ -64,12 +63,7 @@ export default function ProfilePage() {
             <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-2 py-0.5">Celo</span>
           </div>
         ) : (
-          <div className="bg-surface rounded-xl p-3 text-center">
-            <p className="text-xs text-muted mb-2">Connect wallet to receive prizes</p>
-            <button className="text-xs text-brand-light font-semibold bg-brand/10 border border-brand/20 rounded-xl px-4 py-2">
-              Connect Celo wallet
-            </button>
-          </div>
+          <p className="text-xs text-muted text-center py-2">Connect your wallet to receive prizes</p>
         )}
       </div>
 
@@ -89,21 +83,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Reset (for demo) */}
-      <button onClick={() => {
-        if (confirm("Reset all demo progress?")) {
-          localStorage.removeItem("itd-demo-state");
-          window.location.href = "/";
-        }
-      }} className="flex items-center justify-center gap-2 w-full py-3 text-xs text-muted border border-border rounded-xl">
-        <RotateCcw size={12} /> Reset demo
-      </button>
-
       <BottomNav />
     </div>
   );
-}
-
-function clsx(...args: (string | boolean | undefined)[]) {
-  return args.filter(Boolean).join(" ");
 }
