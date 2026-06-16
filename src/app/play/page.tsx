@@ -106,14 +106,19 @@ export default function PlayPage() {
       addScore(earnedPts, correct, newStreak);
       setPhase("feedback");
 
+      // Auto-advance after a short pause — no manual "next" step, just the result
       if (data.ended) {
         setRank(data.rank ?? null);
         setTotalQ(data.totalQuestions ?? totalQ);
+        setTimeout(() => setPhase("done"), 1500);
       } else if (data.nextQuestion) {
         setTimeout(() => {
           setQuestion(data.nextQuestion);
           setQIndex(data.qIndex ?? qIndex + 1);
-        }, 0);
+          setSelected(null);
+          setPhase("question");
+          startTimer();
+        }, 1500);
       }
     } catch {
       setPhase("feedback");
@@ -131,16 +136,6 @@ export default function PlayPage() {
     } catch { /* score already saved question by question */ }
     setExiting(false);
     setPhase("lobby");
-  }
-
-  function next() {
-    if (rank !== null) {
-      setPhase("done");
-      return;
-    }
-    setSelected(null);
-    setPhase("question");
-    startTimer();
   }
 
   const cat = question ? CAT_META[question.category] : null;
@@ -287,9 +282,9 @@ export default function PlayPage() {
         )}
 
         {phase === "feedback" && question && (
-          <motion.div key={`f-${qIndex}`} initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{duration:0.25}} className="flex flex-col gap-4 flex-1">
+          <motion.div key={`f-${qIndex}`} initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{duration:0.25}} className="flex flex-col items-center justify-center flex-1 gap-4">
 
-            <div className={clsx("rounded-2xl p-5 flex items-center gap-4 border-2",
+            <div className={clsx("rounded-2xl p-6 flex items-center gap-4 border-2 w-full max-w-sm",
               isCorrect ? "bg-correct/10 border-correct/40" : "bg-wrong/10 border-wrong/40")}>
               {isCorrect
                 ? <CheckCircle size={40} className="text-correct flex-shrink-0" />
@@ -305,38 +300,6 @@ export default function PlayPage() {
               <span className={clsx("text-3xl font-black", isCorrect ? "text-correct" : "text-wrong")}>
                 {isCorrect ? `+${pts}` : "+0"}
               </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              {question.options.map((opt) => (
-                <div key={opt} className={clsx("option min-h-[60px] flex items-center justify-center text-center",
-                  isCorrect && opt === selected ? "opt-correct"
-                  : !isCorrect && opt === selected ? "opt-wrong"
-                  : "opt-dim")}>
-                  <span className="font-black leading-tight">{opt}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-3 mt-auto">
-              <button
-                onClick={handleExitGame}
-                disabled={exiting}
-                className="flex-none px-4 py-4 rounded-2xl border border-border text-muted hover:text-white transition-colors disabled:opacity-40 flex items-center gap-2 text-sm font-semibold"
-              >
-                {exiting ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
-                Exit
-              </button>
-
-              {rank !== null ? (
-                <button onClick={() => setPhase("done")} className="btn-brand py-4 text-base font-black flex-1">
-                  See final score →
-                </button>
-              ) : (
-                <button onClick={next} className="btn-brand py-4 text-base font-black flex-1">
-                  Next question →
-                </button>
-              )}
             </div>
           </motion.div>
         )}

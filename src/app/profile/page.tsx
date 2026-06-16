@@ -1,7 +1,9 @@
 "use client";
+import { useRouter } from "next/navigation";
+import { useDisconnect } from "wagmi";
 import { useGameStore } from "@/store/gameStore";
 import BottomNav from "@/components/BottomNav";
-import { Flame, Trophy, Target, Zap, Wallet, Star, Eye, EyeOff } from "lucide-react";
+import { Flame, Trophy, Target, Zap, Wallet, Star, Eye, EyeOff, LogOut } from "lucide-react";
 import clsx from "clsx";
 import { useCurrentPlayer } from "@/lib/wallet";
 import { savePlayer } from "@/lib/player";
@@ -18,11 +20,19 @@ const BADGES = [
 export default function ProfilePage() {
   const s = useGameStore();
   const { address } = useCurrentPlayer();
+  const { disconnect } = useDisconnect();
+  const router = useRouter();
 
   async function toggleShowUsername() {
     const newVal = !s.showUsername;
     s.setShowUsername(newVal);
     if (address) await savePlayer(address, { show_username: newVal });
+  }
+
+  function handleDisconnect() {
+    disconnect();
+    s.resetIdentity();
+    router.replace("/");
   }
 
   return (
@@ -98,10 +108,19 @@ export default function ProfilePage() {
           <p className="text-sm font-bold">Wallet</p>
         </div>
         {s.walletAddress ? (
-          <div className="bg-surface rounded-xl px-3 py-2.5 font-mono text-xs text-muted flex items-center justify-between">
-            <span>{s.walletAddress.slice(0,6)}...{s.walletAddress.slice(-4)}</span>
-            <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-2 py-0.5">Celo Sepolia</span>
-          </div>
+          <>
+            <div className="bg-surface rounded-xl px-3 py-2.5 font-mono text-xs text-muted flex items-center justify-between mb-3">
+              <span>{s.walletAddress.slice(0,6)}...{s.walletAddress.slice(-4)}</span>
+              <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-2 py-0.5">Celo Sepolia</span>
+            </div>
+            <button
+              onClick={handleDisconnect}
+              className="flex items-center justify-center gap-2 w-full py-2.5 text-xs font-semibold text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl hover:bg-red-500/10 transition-colors"
+            >
+              <LogOut size={13} />
+              Disconnect &amp; switch wallet
+            </button>
+          </>
         ) : (
           <p className="text-xs text-muted text-center py-2">Connect your wallet to receive prizes</p>
         )}

@@ -25,7 +25,7 @@ export default function WalletSection() {
 
   return (
     <ConnectButton.Custom>
-      {({ account, chain, openConnectModal, mounted }) => {
+      {({ account, chain, openConnectModal, openAccountModal, mounted }) => {
         if (!mounted) return null;
         if (!account) {
           return (
@@ -39,7 +39,11 @@ export default function WalletSection() {
           );
         }
         return (
-          <div className="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2">
+          <button
+            onClick={openAccountModal}
+            title="Tap to disconnect or switch wallet"
+            className="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2 hover:border-brand/40 transition-colors"
+          >
             <Wallet size={13} className="text-emerald-400" />
             <span className="font-mono text-xs text-muted">
               {account.address.slice(0, 6)}…{account.address.slice(-4)}
@@ -47,7 +51,7 @@ export default function WalletSection() {
             <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-1.5 py-0.5 ml-auto">
               {chain?.name ?? "Celo"}
             </span>
-          </div>
+          </button>
         );
       }}
     </ConnectButton.Custom>

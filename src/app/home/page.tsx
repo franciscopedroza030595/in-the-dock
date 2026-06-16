@@ -61,7 +61,7 @@ export default function HomePage() {
     load();
     function onFocus() { load(); }
     window.addEventListener("focus", onFocus);
-    const id = setInterval(load, 5000);
+    const id = setInterval(load, 3000);
     return () => { active = false; window.removeEventListener("focus", onFocus); clearInterval(id); };
   }, [address]);
 

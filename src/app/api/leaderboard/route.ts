@@ -1,9 +1,13 @@
 import { supabase, todayUtc } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
+const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" };
 
 export async function GET() {
-  if (!supabase) return Response.json({ entries: [] });
+  if (!supabase) return Response.json({ entries: [] }, { headers: NO_STORE });
 
   const day = todayUtc();
 
@@ -15,7 +19,7 @@ export async function GET() {
     .eq("status", "finished")
     .order("score", { ascending: false })
     .order("ended_at", { ascending: true })
-    .limit(100);
+    .limit(500);
 
   const rows = (runs ?? []) as Array<{
     player: string;
@@ -34,7 +38,7 @@ export async function GET() {
     .sort((a, b) => b.score - a.score || a.ended_at.localeCompare(b.ended_at))
     .slice(0, 50);
 
-  if (sorted.length === 0) return Response.json({ entries: [], dayUtc: day });
+  if (sorted.length === 0) return Response.json({ entries: [], dayUtc: day }, { headers: NO_STORE });
 
   // Fetch player profiles in one query
   const addresses = sorted.map(r => r.player);
@@ -60,5 +64,5 @@ export async function GET() {
     };
   });
 
-  return Response.json({ entries, dayUtc: day });
+  return Response.json({ entries, dayUtc: day }, { headers: NO_STORE });
 }

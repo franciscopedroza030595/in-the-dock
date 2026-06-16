@@ -50,7 +50,7 @@ export default function LeaderboardPage() {
     // Refresh on tab focus and on a short interval so a just-finished run shows up immediately
     function onFocus() { load(); }
     window.addEventListener("focus", onFocus);
-    const id = setInterval(load, 5000);
+    const id = setInterval(load, 3000);
     return () => { active = false; window.removeEventListener("focus", onFocus); clearInterval(id); };
   }, []);
 

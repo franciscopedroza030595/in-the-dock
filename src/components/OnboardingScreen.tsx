@@ -5,30 +5,38 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useGameStore } from "@/store/gameStore";
 import { useCurrentPlayer } from "@/lib/wallet";
-import { savePlayer } from "@/lib/player";
+import { savePlayer, getPlayer } from "@/lib/player";
 
 export default function OnboardingScreen() {
-  const { username, setUsername, completeOnboarding } = useGameStore();
+  const { setUsername, setShowUsername, setWallet, completeOnboarding } = useGameStore();
   const { isConnected, address } = useCurrentPlayer();
   const router = useRouter();
 
   const [name, setName] = useState("");
-  // true once wallet is connected and we've decided we need a username
+  // true once we've checked the DB for this address and found no username yet
   const [needsName, setNeedsName] = useState(false);
+  const [checking, setChecking] = useState(false);
 
-  // When wallet connects, decide what to do
+  // When wallet connects, look up THIS address in the DB — never trust stale
+  // local state, since a different wallet may have connected this session.
   useEffect(() => {
     if (!isConnected || !address) return;
-
-    const hasRealName = username && username !== "Player" && !username.startsWith("Player");
-    if (hasRealName) {
-      // Username already set — skip straight home
-      completeOnboarding();
-      router.replace("/home");
-    } else {
-      // Need to ask for a username
-      setNeedsName(true);
-    }
+    let active = true;
+    setChecking(true);
+    getPlayer(address).then((record) => {
+      if (!active) return;
+      setChecking(false);
+      setWallet(address);
+      if (record && record.username) {
+        setUsername(record.username);
+        setShowUsername(record.show_username);
+        completeOnboarding();
+        router.replace("/home");
+      } else {
+        setNeedsName(true);
+      }
+    });
+    return () => { active = false; };
   }, [isConnected, address]);
 
   function finish() {
@@ -65,10 +73,10 @@ export default function OnboardingScreen() {
             {({ openConnectModal, connectModalOpen }) => (
               <button
                 onClick={openConnectModal}
-                disabled={connectModalOpen}
+                disabled={connectModalOpen || checking}
                 className="btn-brand py-5 text-lg font-black w-full"
               >
-                {connectModalOpen ? "Connecting…" : "Connect wallet to play →"}
+                {checking ? "Checking your account…" : connectModalOpen ? "Connecting…" : "Connect wallet to play →"}
               </button>
             )}
           </ConnectButton.Custom>

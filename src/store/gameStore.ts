@@ -48,6 +48,7 @@ interface GameState {
   addScore: (pts: number, correct: boolean, streak: number) => void;
   endSession: () => void;
   resetIfNewDay: () => void;
+  resetIdentity: () => void;
 }
 
 function todayStr() {
@@ -131,6 +132,26 @@ export const useGameStore = create<GameState>()(
       },
 
       endSession: () => set({ sessionActive: false }),
+
+      // Wipe all local identity/stats — used when disconnecting to switch wallets,
+      // since stats are per-wallet (server-side) and shouldn't leak across accounts.
+      resetIdentity: () => set({
+        username:       "Player",
+        showUsername:   true,
+        walletAddress:  null,
+        isOnboarded:    false,
+        todayDate:      todayStr(),
+        todayScore:     0,
+        todayCorrect:   0,
+        todayAttempted: 0,
+        todayAttempts:  [],
+        streak:         0,
+        bestStreak:     0,
+        allTimeScore:   0,
+        allTimeSolved:  0,
+        daysPlayed:     0,
+        totalEarned:    0,
+      }),
 
       resetIfNewDay: () => {
         const s = get();

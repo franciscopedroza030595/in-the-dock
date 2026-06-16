@@ -2,12 +2,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "@/store/gameStore";
-import { useCurrentPlayer } from "@/lib/wallet";
 import OnboardingScreen from "@/components/OnboardingScreen";
 
 export default function Home() {
-  const { isOnboarded, username, resetIfNewDay, completeOnboarding } = useGameStore();
-  const { isConnected, address } = useCurrentPlayer();
+  const { isOnboarded, resetIfNewDay } = useGameStore();
   const router = useRouter();
   const [ready, setReady] = useState(false);
 
@@ -16,15 +14,9 @@ export default function Home() {
     setReady(true);
   }, []);
 
-  // If wallet connects and we already have a real username → mark onboarded and go home
-  useEffect(() => {
-    if (!ready) return;
-    const hasUsername = username && username !== "Player" && !username.startsWith("Player");
-    if (isConnected && address && hasUsername && !isOnboarded) {
-      completeOnboarding();
-    }
-  }, [ready, isConnected, address, username, isOnboarded]);
-
+  // Identity (username/wallet) is resolved per-address inside OnboardingScreen,
+  // which fetches the DB record for the connected wallet — never trust local
+  // state alone, since a different wallet may connect this session.
   useEffect(() => {
     if (ready && isOnboarded) router.replace("/home");
   }, [ready, isOnboarded]);
