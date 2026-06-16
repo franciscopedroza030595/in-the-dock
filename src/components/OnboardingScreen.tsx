@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useGameStore } from "@/store/gameStore";
 import { useCurrentPlayer } from "@/lib/wallet";
+import { savePlayer } from "@/lib/player";
 
 export default function OnboardingScreen() {
   const { username, setUsername, completeOnboarding } = useGameStore();
@@ -34,6 +35,7 @@ export default function OnboardingScreen() {
     const finalName = name.trim() || `Player${Math.floor(Math.random() * 9999)}`;
     setUsername(finalName);
     completeOnboarding();
+    if (address) savePlayer(address, { username: finalName, show_username: true });
     router.replace("/home");
   }
 

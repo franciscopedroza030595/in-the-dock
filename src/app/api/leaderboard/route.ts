@@ -7,8 +7,7 @@ export async function GET() {
 
   const day = todayUtc();
 
-  // Best score per player today (finished runs only)
-  const { data } = await supabase
+  const { data: runs } = await supabase
     .from("runs")
     .select("player,score,correct_count,ended_at")
     .eq("game_id", 1)
@@ -18,28 +17,48 @@ export async function GET() {
     .order("ended_at", { ascending: true })
     .limit(100);
 
-  const rows = (data ?? []) as Array<{
+  const rows = (runs ?? []) as Array<{
     player: string;
     score: number;
     correct_count: number;
     ended_at: string;
   }>;
 
-  // Deduplicate: keep best run per player
+  // Best run per player
   const seen = new Map<string, (typeof rows)[0]>();
   for (const row of rows) {
     if (!seen.has(row.player)) seen.set(row.player, row);
   }
 
-  const entries = Array.from(seen.values())
+  const sorted = Array.from(seen.values())
     .sort((a, b) => b.score - a.score || a.ended_at.localeCompare(b.ended_at))
-    .slice(0, 50)
-    .map((e, i) => ({
+    .slice(0, 50);
+
+  if (sorted.length === 0) return Response.json({ entries: [], dayUtc: day });
+
+  // Fetch player profiles in one query
+  const addresses = sorted.map(r => r.player);
+  const { data: players } = await supabase
+    .from("players")
+    .select("address,username,show_username")
+    .in("address", addresses);
+
+  const playerMap = new Map(
+    ((players ?? []) as Array<{ address: string; username: string; show_username: boolean }>)
+      .map(p => [p.address, p])
+  );
+
+  const entries = sorted.map((e, i) => {
+    const p = playerMap.get(e.player);
+    const showName = p?.show_username !== false && p?.username;
+    return {
       rank: i + 1,
       player: e.player,
+      displayName: showName ? p!.username : null, // null = show wallet address
       score: e.score,
       correctCount: e.correct_count,
-    }));
+    };
+  });
 
   return Response.json({ entries, dayUtc: day });
 }

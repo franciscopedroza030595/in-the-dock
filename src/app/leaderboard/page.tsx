@@ -11,6 +11,7 @@ const COLORS = ["bg-yellow-500","bg-blue-500","bg-purple-500","bg-pink-500","bg-
 interface Entry {
   rank: number;
   player: string;
+  displayName: string | null;
   score: number;
   correctCount: number;
 }
@@ -51,7 +52,7 @@ export default function LeaderboardPage() {
 
   function displayName(entry: Entry) {
     if (address && entry.player.toLowerCase() === address.toLowerCase()) return username;
-    return shortAddr(entry.player);
+    return entry.displayName ?? shortAddr(entry.player);
   }
 
   return (

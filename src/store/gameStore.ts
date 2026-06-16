@@ -36,8 +36,11 @@ interface GameState {
   currentIdx: number;
   sessionActive: boolean;
 
+  showUsername: boolean;
+
   // Actions
   setUsername: (name: string) => void;
+  setShowUsername: (show: boolean) => void;
   setWallet: (addr: string) => void;
   completeOnboarding: () => void;
   startSession: (challenges: Challenge[]) => void;
@@ -55,6 +58,7 @@ export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
       username:        "Player",
+      showUsername:    true,
       walletAddress:   null,
       isOnboarded:     false,
 
@@ -76,6 +80,7 @@ export const useGameStore = create<GameState>()(
       sessionActive:     false,
 
       setUsername: (name) => set({ username: name }),
+      setShowUsername: (show) => set({ showUsername: show }),
       setWallet:   (addr) => set({ walletAddress: addr }),
 
       completeOnboarding: () => set({ isOnboarded: true }),
@@ -146,7 +151,7 @@ export const useGameStore = create<GameState>()(
     {
       name: "itd-demo-state",
       partialize: (s) => ({
-        username: s.username, walletAddress: s.walletAddress, isOnboarded: s.isOnboarded,
+        username: s.username, showUsername: s.showUsername, walletAddress: s.walletAddress, isOnboarded: s.isOnboarded,
         todayDate: s.todayDate, todayScore: s.todayScore, todayCorrect: s.todayCorrect,
         todayAttempted: s.todayAttempted, todayAttempts: s.todayAttempts,
         streak: s.streak, bestStreak: s.bestStreak,

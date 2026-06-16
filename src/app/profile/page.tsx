@@ -1,8 +1,10 @@
 "use client";
 import { useGameStore } from "@/store/gameStore";
 import BottomNav from "@/components/BottomNav";
-import { Flame, Trophy, Target, Zap, Wallet, Star } from "lucide-react";
+import { Flame, Trophy, Target, Zap, Wallet, Star, Eye, EyeOff } from "lucide-react";
 import clsx from "clsx";
+import { useCurrentPlayer } from "@/lib/wallet";
+import { savePlayer } from "@/lib/player";
 
 const BADGES = [
   { id:"first",    emoji:"🎯", label:"First solve",    check: (s:any) => s.allTimeSolved >= 1 },
@@ -15,6 +17,13 @@ const BADGES = [
 
 export default function ProfilePage() {
   const s = useGameStore();
+  const { address } = useCurrentPlayer();
+
+  async function toggleShowUsername() {
+    const newVal = !s.showUsername;
+    s.setShowUsername(newVal);
+    if (address) await savePlayer(address, { show_username: newVal });
+  }
 
   return (
     <div className="min-h-svh pb-24 px-4 pt-5 overflow-y-auto">
@@ -33,6 +42,37 @@ export default function ProfilePage() {
             </div>
           )}
           <p className="text-xs text-muted mt-0.5">{s.daysPlayed} days played</p>
+        </div>
+      </div>
+
+      {/* Leaderboard identity toggle */}
+      <div className="card p-4 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {s.showUsername
+              ? <Eye size={15} className="text-brand-light" />
+              : <EyeOff size={15} className="text-muted" />}
+            <div>
+              <p className="text-sm font-bold">Leaderboard display</p>
+              <p className="text-xs text-muted mt-0.5">
+                {s.showUsername
+                  ? `Showing as "${s.username}"`
+                  : "Showing as wallet address"}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={toggleShowUsername}
+            className={clsx(
+              "relative w-11 h-6 rounded-full transition-colors",
+              s.showUsername ? "bg-brand" : "bg-surface border border-border"
+            )}
+          >
+            <span className={clsx(
+              "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+              s.showUsername ? "translate-x-5" : "translate-x-0.5"
+            )} />
+          </button>
         </div>
       </div>
 
@@ -60,7 +100,7 @@ export default function ProfilePage() {
         {s.walletAddress ? (
           <div className="bg-surface rounded-xl px-3 py-2.5 font-mono text-xs text-muted flex items-center justify-between">
             <span>{s.walletAddress.slice(0,6)}...{s.walletAddress.slice(-4)}</span>
-            <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-2 py-0.5">Celo</span>
+            <span className="text-[10px] text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded px-2 py-0.5">Celo Sepolia</span>
           </div>
         ) : (
           <p className="text-xs text-muted text-center py-2">Connect your wallet to receive prizes</p>

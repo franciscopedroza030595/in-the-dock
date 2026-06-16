@@ -9,6 +9,7 @@ import { useCurrentPlayer } from "@/lib/wallet";
 interface LeaderEntry {
   rank: number;
   player: string;
+  displayName: string | null;
   score: number;
   correctCount: number;
 }
@@ -59,7 +60,7 @@ export default function HomePage() {
 
   function displayName(entry: LeaderEntry) {
     if (address && entry.player.toLowerCase() === address.toLowerCase()) return username;
-    return shortAddr(entry.player);
+    return entry.displayName ?? shortAddr(entry.player);
   }
 
   return (
