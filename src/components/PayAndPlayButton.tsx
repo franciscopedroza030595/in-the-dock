@@ -7,7 +7,7 @@ import { POT_ADDRESS, USDC_ADDRESS, ENTRY_FEE_UNITS } from "@/lib/chain";
 import { ITD_ABI } from "@/lib/onchain";
 import { useCurrentPlayer } from "@/lib/wallet";
 import { useTxOverrides } from "@/lib/minipay";
-import { Brain, Loader2, AlertTriangle, Droplets } from "lucide-react";
+import { Brain, Loader2, AlertTriangle } from "lucide-react";
 
 const ERC20_APPROVE_ABI = parseAbi([
   "function approve(address spender, uint256 amount) returns (bool)",
@@ -15,11 +15,7 @@ const ERC20_APPROVE_ABI = parseAbi([
 
 const ERC20_ABI = parseAbi([
   "function balanceOf(address) view returns (uint256)",
-  "function mint(address to, uint256 amount) external",
 ]);
-
-// 10 USDC (6 decimals)
-const MINT_AMOUNT = BigInt(10_000_000);
 
 interface Props {
   onRunStarted: (runId: string, firstQuestion: unknown) => void;
@@ -37,8 +33,6 @@ export default function PayAndPlayButton({ onRunStarted }: Props) {
   const publicClient = usePublicClient();
   const [step, setStep] = useState<Step>("idle");
   const [errorMsg, setErrorMsg] = useState("");
-
-  const [minting, setMinting] = useState(false);
 
   // Read USDC balance
   const { data: usdcBalance, refetch: refetchBalance } = useReadContract({
@@ -59,23 +53,6 @@ export default function PayAndPlayButton({ onRunStarted }: Props) {
   });
 
   const { writeContractAsync } = useWriteContract();
-
-  async function handleMint() {
-    if (!address || minting) return;
-    setMinting(true);
-    try {
-      const hash = await writeContractAsync({
-        address: USDC_ADDRESS,
-        abi: ERC20_ABI,
-        functionName: "mint",
-        args: [address as `0x${string}`, MINT_AMOUNT],
-        ...txOverrides,
-      });
-      if (publicClient) await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 });
-      await refetchBalance();
-    } catch { /* user rejected */ }
-    setMinting(false);
-  }
 
   async function handlePlay() {
     if (!isConnected || !address) return;
@@ -191,20 +168,12 @@ export default function PayAndPlayButton({ onRunStarted }: Props) {
       {balanceUsdc !== null && (
         <div className="flex items-center justify-between text-xs px-1">
           <span className="text-muted">USDC balance: <span className="text-white font-semibold">{balanceUsdc.toFixed(2)} USDC</span></span>
-          <button
-            onClick={handleMint}
-            disabled={minting}
-            className="flex items-center gap-1 text-brand-light font-semibold hover:underline disabled:opacity-50"
-          >
-            {minting ? <Loader2 size={11} className="animate-spin" /> : <Droplets size={11} />}
-            {minting ? "Minting…" : "Get test USDC"}
-          </button>
         </div>
       )}
 
       {needsUsdc && (
         <div className="rounded-xl p-3 bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300 text-center">
-          You need at least 0.10 USDC to play again. Tap "Get test USDC" above to mint some free testnet tokens.
+          You need at least 0.10 USDC to play again. Get testnet USDC at faucet.circle.com.
         </div>
       )}
 

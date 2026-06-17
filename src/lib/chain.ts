@@ -16,8 +16,8 @@ export const USDC_ADDRESS = (
 // 0.10 USDC — 6 decimals
 export const ENTRY_FEE_UNITS = BigInt(100_000);
 
-// On testnet we use MockUSDT which has no CIP-64 fee adapter,
-// so users pay gas in CELO (get it from faucet.celo.org/celo-sepolia).
+// Using Circle's official Celo Sepolia USDC (no CIP-64 fee adapter on testnet).
+// Users pay gas in CELO — get it from faucet.celo.org/celo-sepolia.
 export const CELO_TRANSPORT: Transport = fallback([
   http(process.env.NEXT_PUBLIC_CELO_RPC_URL || SEPOLIA_RPC),
   http(SEPOLIA_RPC),
