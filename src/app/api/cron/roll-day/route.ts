@@ -7,9 +7,23 @@ import { ITD_ABI, readCurrentDay } from "@/lib/onchain";
 
 export const dynamic = "force-dynamic";
 
+// Vercel cron sends GET with Authorization: Bearer <CRON_SECRET>
+// Also accept POST with x-cron-secret for manual triggers
+export async function GET(req: NextRequest) {
+  return handleRollDay(req);
+}
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET)
+  return handleRollDay(req);
+}
+
+async function handleRollDay(req: NextRequest) {
+  const authHeader = req.headers.get("authorization") ?? "";
+  const xSecret = req.headers.get("x-cron-secret") ?? "";
+  const cronSecret = process.env.CRON_SECRET ?? "";
+  const authorized =
+    xSecret === cronSecret ||
+    authHeader === `Bearer ${cronSecret}`;
+  if (!authorized)
     return Response.json({ error: "unauthorized" }, { status: 401 });
 
   if (!supabase) return Response.json({ error: "db-unconfigured" }, { status: 503 });

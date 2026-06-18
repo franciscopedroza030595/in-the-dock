@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useGameStore } from "@/store/gameStore";
 import BottomNav from "@/components/BottomNav";
+import ClaimPrizeBanner from "@/components/ClaimPrizeBanner";
 import { Flame, Trophy, Zap, Brain, ChevronRight } from "lucide-react";
 import { useCurrentPlayer } from "@/lib/wallet";
 
@@ -88,6 +89,9 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Prize claim banner — only visible to yesterday's winner */}
+      <ClaimPrizeBanner />
 
       {/* Rank hero */}
       <div className="rounded-3xl p-5 mb-4 relative overflow-hidden border border-brand/30" style={{background:"linear-gradient(135deg,rgba(124,58,237,0.15),rgba(124,58,237,0.05))"}}>
