@@ -31,9 +31,9 @@ async function handleRollDay(req: NextRequest) {
   const operatorKey = process.env.OPERATOR_PRIVATE_KEY as `0x${string}` | undefined;
   if (!operatorKey) return Response.json({ error: "no-operator-key" }, { status: 503 });
 
-  // Use today's date — correct for same-day testing and the first production day.
-  // Switch back to yesterdayStr once daily midnight rolls are stable.
-  const closingDayStr = todayUtc();
+  const yesterday = new Date();
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const closingDayStr = yesterday.toISOString().slice(0, 10);
 
   // Find winner: highest score among finished runs on the closing day
   const { data: runs } = await supabase
