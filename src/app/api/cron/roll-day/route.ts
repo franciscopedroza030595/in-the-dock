@@ -3,7 +3,7 @@ import { createWalletClient, http, parseAbi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { supabase, todayUtc } from "@/lib/supabase";
 import { ACTIVE_CHAIN, POT_ADDRESS } from "@/lib/chain";
-import { ITD_ABI, readCurrentDay } from "@/lib/onchain";
+import { ITD_ABI, readCurrentDay, celoClient } from "@/lib/onchain";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +72,16 @@ async function handleRollDay(req: NextRequest) {
     }
   }
 
+  // Read actual pot amount on-chain BEFORE rolling (rollDay doesn't clear pot[closedDay])
+  const closedDayOnChain = await readCurrentDay();
+  const potAmountUnits = await celoClient.readContract({
+    address: POT_ADDRESS,
+    abi: ITD_ABI,
+    functionName: "viewPot",
+    args: [closedDayOnChain],
+  }) as bigint;
+  const potAmountStr = potAmountUnits.toString();
+
   // Call rollDay on contract
   const account = privateKeyToAccount(operatorKey);
   const walletClient = createWalletClient({
@@ -95,32 +105,25 @@ async function handleRollDay(req: NextRequest) {
   const dayNumber = Number(await readCurrentDay()) - 1; // closed day
   const today = todayUtc();
 
-  // Update pots table for closed day
+  // Update pots table for closed day with real on-chain amount
   await supabase.from("pots").upsert({
     game_id: 1,
     day_utc: closingDayStr,
     day_number: dayNumber,
+    amount_units: potAmountStr,
     winner: winner ?? null,
     winner_score: winnerScore || null,
     rolled_tx: txHash,
     closed: true,
   }, { onConflict: "game_id,day_utc" });
 
-  // Record win
+  // Record win with real on-chain pot amount
   if (winner) {
-    const { data: potRow } = await supabase
-      .from("pots")
-      .select("amount_units")
-      .eq("game_id", 1)
-      .eq("day_utc", closingDayStr)
-      .maybeSingle();
-
-    const amount = (potRow as { amount_units: string } | null)?.amount_units ?? "0";
     await supabase.from("wins").upsert({
       game_id: 1,
       day_utc: closingDayStr,
       player: winner,
-      amount_units: amount,
+      amount_units: potAmountStr,
       score: winnerScore,
     }, { onConflict: "game_id,day_utc,player" });
   }
