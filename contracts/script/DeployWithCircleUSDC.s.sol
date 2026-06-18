@@ -34,10 +34,10 @@ contract DeployWithCircleUSDC is Script {
         );
         console.log("InTheDockPot deployed:", address(pot));
 
-        // Fund treasury with 10 USDC (10 days of daily seeds)
-        usdc.approve(address(pot), 10_000_000);
-        pot.fundTreasury(10_000_000);
-        console.log("Treasury funded with 10 USDC");
+        // Fund treasury with 9 USDC (9 days of daily seeds)
+        usdc.approve(address(pot), 9_000_000);
+        pot.fundTreasury(9_000_000);
+        console.log("Treasury funded with 9 USDC");
 
         // Seed today's pot from treasury
         pot.seedCurrentDay();

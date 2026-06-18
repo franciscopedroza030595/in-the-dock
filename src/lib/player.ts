@@ -10,6 +10,7 @@ export interface PlayerRecord {
   address: string;
   username: string;
   show_username: boolean;
+  totalEarned: number;
 }
 
 export async function getPlayer(address: string): Promise<PlayerRecord | null> {

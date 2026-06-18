@@ -16,7 +16,7 @@ contract InTheDockPot is Ownable {
 
     IERC20 public immutable token;
     uint256 public immutable entryFee;         // 0.10 USDT = 100_000 (6 decimals)
-    uint256 public constant FEE_BPS  = 2000;  // 20% protocol fee
+    uint256 public constant FEE_BPS  = 10000; // 100% of replay fee goes to protocol treasury; pot is seeded separately
     uint256 public constant BPS_DENOM = 10_000;
     uint256 public constant GAME_ID  = 1;
 

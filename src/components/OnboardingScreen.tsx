@@ -8,7 +8,7 @@ import { useCurrentPlayer } from "@/lib/wallet";
 import { savePlayer, getPlayer } from "@/lib/player";
 
 export default function OnboardingScreen() {
-  const { setUsername, setShowUsername, setWallet, completeOnboarding } = useGameStore();
+  const { setUsername, setShowUsername, setWallet, completeOnboarding, setEarned } = useGameStore();
   const { isConnected, address } = useCurrentPlayer();
   const router = useRouter();
 
@@ -30,6 +30,7 @@ export default function OnboardingScreen() {
       if (record && record.username) {
         setUsername(record.username);
         setShowUsername(record.show_username);
+        setEarned(record.totalEarned ?? 0);
         completeOnboarding();
         router.replace("/home");
       } else {

@@ -19,5 +19,18 @@ export async function GET(
     .eq("address", addr)
     .maybeSingle();
 
-  return Response.json({ player: data ?? null });
+  // Sum all-time USDC wins for this player
+  const { data: wins } = await supabase
+    .from("wins")
+    .select("amount_units")
+    .eq("player", addr);
+
+  const totalEarnedUnits = (wins ?? []).reduce(
+    (sum: number, w: { amount_units: string }) => sum + Number(w.amount_units ?? 0),
+    0
+  );
+
+  return Response.json({
+    player: data ? { ...data, totalEarned: totalEarnedUnits / 1_000_000 } : null,
+  });
 }
