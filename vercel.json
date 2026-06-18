@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/roll-day",
-      "schedule": "1 0 * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }
