@@ -46,6 +46,7 @@ interface GameState {
   startSession: (challenges: Challenge[]) => void;
   recordAttempt: (challengeId: string, correct: boolean, ms: number) => void;
   addScore: (pts: number, correct: boolean, streak: number) => void;
+  addEarned: (usdc: number) => void;
   endSession: () => void;
   resetIfNewDay: () => void;
   resetIdentity: () => void;
@@ -130,6 +131,8 @@ export const useGameStore = create<GameState>()(
           allTimeSolved: s2.allTimeSolved + (correct ? 1 : 0),
         });
       },
+
+      addEarned: (usdc) => set((s) => ({ totalEarned: s.totalEarned + usdc })),
 
       endSession: () => set({ sessionActive: false }),
 

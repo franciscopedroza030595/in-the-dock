@@ -6,11 +6,13 @@ import { POT_ADDRESS } from "@/lib/chain";
 import { ITD_ABI } from "@/lib/onchain";
 import { useCurrentPlayer } from "@/lib/wallet";
 import { Trophy, Loader2 } from "lucide-react";
+import { useGameStore } from "@/store/gameStore";
 
 export default function ClaimPrizeBanner() {
   const { address, isConnected } = useCurrentPlayer();
   const publicClient = usePublicClient();
   const { writeContractAsync } = useWriteContract();
+  const addEarned = useGameStore((s) => s.addEarned);
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimedLocal] = useState(false);
   const [error, setError] = useState("");
@@ -71,6 +73,7 @@ export default function ClaimPrizeBanner() {
       if (publicClient) {
         await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 });
       }
+      addEarned(Number(potAmount as bigint) / 1_000_000);
       setClaimedLocal(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

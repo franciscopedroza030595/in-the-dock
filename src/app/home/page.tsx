@@ -156,8 +156,8 @@ export default function HomePage() {
 
       {/* Daily prize info */}
       <div className="card p-4">
-        <p className="text-sm font-semibold mb-1">🏆 Daily prize: 1 USDC</p>
-        <p className="text-xs text-muted">Highest score at midnight wins. Prize paid on-chain to winner's wallet.</p>
+        <p className="text-sm font-semibold mb-1">🏆 Daily prize: 1+ USDC</p>
+        <p className="text-xs text-muted">Starts at 1 USDC — grows as players pay to replay. Highest score at midnight wins.</p>
       </div>
 
       <BottomNav />
