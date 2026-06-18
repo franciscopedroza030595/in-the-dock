@@ -32,5 +32,6 @@ export async function GET(
 
   return Response.json({
     player: data ? { ...data, totalEarned: totalEarnedUnits / 1_000_000 } : null,
+    v: 2,
   });
 }
