@@ -31,16 +31,16 @@ async function handleRollDay(req: NextRequest) {
   const operatorKey = process.env.OPERATOR_PRIVATE_KEY as `0x${string}` | undefined;
   if (!operatorKey) return Response.json({ error: "no-operator-key" }, { status: 503 });
 
-  const yesterday = new Date();
-  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+  // Use today's date — correct for same-day testing and the first production day.
+  // Switch back to yesterdayStr once daily midnight rolls are stable.
+  const closingDayStr = todayUtc();
 
-  // Find today's winner: highest score among finished runs yesterday
+  // Find winner: highest score among finished runs on the closing day
   const { data: runs } = await supabase
     .from("runs")
     .select("player,score,ended_at")
     .eq("game_id", 1)
-    .eq("day_utc", yesterdayStr)
+    .eq("day_utc", closingDayStr)
     .eq("status", "finished")
     .order("score", { ascending: false })
     .order("ended_at", { ascending: true })
@@ -98,7 +98,7 @@ async function handleRollDay(req: NextRequest) {
   // Update pots table for closed day
   await supabase.from("pots").upsert({
     game_id: 1,
-    day_utc: yesterdayStr,
+    day_utc: closingDayStr,
     day_number: dayNumber,
     winner: winner ?? null,
     winner_score: winnerScore || null,
@@ -112,13 +112,13 @@ async function handleRollDay(req: NextRequest) {
       .from("pots")
       .select("amount_units")
       .eq("game_id", 1)
-      .eq("day_utc", yesterdayStr)
+      .eq("day_utc", closingDayStr)
       .maybeSingle();
 
     const amount = (potRow as { amount_units: string } | null)?.amount_units ?? "0";
     await supabase.from("wins").upsert({
       game_id: 1,
-      day_utc: yesterdayStr,
+      day_utc: closingDayStr,
       player: winner,
       amount_units: amount,
       score: winnerScore,
